@@ -740,6 +740,7 @@ function renderShell(inner){
           <div style="font-size:11px;color:var(--ink-muted);">${u.rating.toFixed(1)}★ · ${u.sessionsCompleted} sessions</div>
         </div>
       </div>
+      <div class="nav-item" data-act="open-logout">${icon("logout")}<span>Log out</span></div>
       <div class="rail-foot">${esc(u.school)} · Peer Network</div>
     </aside>
     <main class="main">${inner}</main>
@@ -1281,6 +1282,20 @@ function completeModal(){
     </div>
   </div>`;
 }
+function logoutModal(){
+  const u = you();
+  return `
+  <div class="modal-veil" data-act="close-modal">
+    <div class="modal" data-act="noop" style="max-width:400px;">
+      <div class="modal-head"><h2>Log out?</h2><button class="modal-close" data-act="close-modal">${icon("close")}</button></div>
+      <p class="modal-sub">This permanently clears <strong>${esc(u.name)}</strong>'s profile, matches, requests, sessions, and progress from this browser. There's no backend behind this prototype, so once it's cleared it can't be recovered — you'd start over from sign-up.</p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" data-act="close-modal">Cancel</button>
+        <button class="btn btn-danger" data-act="confirm-logout">Log out &amp; clear data</button>
+      </div>
+    </div>
+  </div>`;
+}
 function suggestBadgeFor(skill){
   const map = {"Python":"Python Mentor","JavaScript":"JS Mentor","React":"React Mentor","Guitar":"Music Maestro","Photoshop":"Design Guru","UI/UX Design":"Design Guru","Public Speaking":"Pitch Perfect"};
   return map[skill] || null;
@@ -1394,6 +1409,7 @@ function render(){
     if(state.modal.type==="request") modalHTML = requestModal();
     else if(state.modal.type==="schedule") modalHTML = scheduleModal();
     else if(state.modal.type==="complete") modalHTML = completeModal();
+    else if(state.modal.type==="logout") modalHTML = logoutModal();
   }
   app.innerHTML = html + modalHTML;
 
@@ -1416,6 +1432,14 @@ function go(tab, extra){
   state.modal = null;
   window.scrollTo({top:0});
   render();
+}
+
+function logOut(){
+  try{ localStorage.removeItem(STORE_KEY); }catch(e){ /* storage unavailable, continue in-memory */ }
+  state = freshState();
+  window.scrollTo({top:0});
+  render();
+  toast("You've been logged out — your account data was cleared.");
 }
 
 document.addEventListener("click", function(e){
@@ -1545,6 +1569,8 @@ document.addEventListener("click", function(e){
   }
 
   if(act==="open-complete"){ state.modal={type:"complete"}; render(); return; }
+  if(act==="open-logout"){ state.modal={type:"logout"}; render(); return; }
+  if(act==="confirm-logout"){ logOut(); return; }
   if(act==="rate-star"){ state.modal.stars = parseInt(t.dataset.val,10); render(); return; }
   if(act==="rate-tag"){
     const tag = t.dataset.tag;
