@@ -539,7 +539,7 @@ function freshState(){
     sessions: [],
     progress: {},
     route: {tab:"landing"},
-    onboarding: {step:1, teach:[], learn:[], availability:[], customAvailability:[], name:"", school:"APIIT", year:"", bio:""}
+    onboarding: {step:1, teach:[], learn:[], availability:[], customAvailability:[], name:"", school:"", year:"", bio:""}
   };
 }
 function loadState(){
@@ -766,7 +766,7 @@ function onbStep1(){
     <p class="onb-help">Just the basics — your matches will be built from the skills you pick next.</p>
     <div class="field"><label for="f-name">Full name</label><input id="f-name" type="text" placeholder="e.g. Kalmira Kisandu" value="${esc(ob.name)}"></div>
     <div class="field-row">
-      <div class="field"><label for="f-school">School / community</label><input id="f-school" type="text" value="${esc(ob.school)}"></div>
+      <div class="field"><label for="f-school">School / community</label><input id="f-school" type="text" placeholder="e.g. APIIT, or your community's name" value="${esc(ob.school)}"></div>
       <div class="field"><label for="f-year">Year &amp; major</label><input id="f-year" type="text" placeholder="e.g. Year 2, Computer Science" value="${esc(ob.year)}"></div>
     </div>
     <div class="field"><label for="f-bio">Short bio <span style="text-transform:none;font-weight:500;color:var(--ink-faint);">(optional)</span></label><textarea id="f-bio" placeholder="A line about what you're into...">${esc(ob.bio)}</textarea></div>
@@ -1350,7 +1350,7 @@ document.addEventListener("click", function(e){
     const name = document.getElementById("f-name").value.trim();
     if(!name){ toast("Please enter your name to continue."); return; }
     state.onboarding.name = name;
-    state.onboarding.school = document.getElementById("f-school").value.trim() || "APIIT";
+    state.onboarding.school = document.getElementById("f-school").value.trim();
     state.onboarding.year = document.getElementById("f-year").value.trim();
     state.onboarding.bio = document.getElementById("f-bio").value.trim();
     state.onboarding.step = 2;
@@ -1394,7 +1394,7 @@ document.addEventListener("click", function(e){
     const ob = state.onboarding;
     const id = "you";
     state.users[id] = {
-      id, name: ob.name, school: ob.school||"APIIT", year: ob.year||"Undeclared",
+      id, name: ob.name, school: ob.school||"Independent", year: ob.year||"Undeclared",
       bio: ob.bio, teach: ob.teach.slice(), want: ob.learn.slice(), availability: ob.availability.concat(ob.customAvailability),
       rating: 0, sessionsCompleted: 0, badges: [], memberSince: new Date().toLocaleDateString(undefined,{month:"short",year:"numeric"}),
       hue: hashStr(ob.name)%360
