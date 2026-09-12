@@ -15,6 +15,18 @@ start index.html        # Windows
 
 Or clone the repo and double-click the file. Everything (markup, styles, app logic, the brand logo) lives in that one file; it works straight from disk over `file://` as well as hosted anywhere static (GitHub Pages, Netlify, S3, …).
 
+## Tech stack
+
+Zero dependencies, zero build step — just HTML, CSS, and JavaScript.
+
+- **Core** — vanilla HTML5 / CSS3 / ES6+ JavaScript. No framework (no React, Vue, etc.), no bundler or transpiler, no package manager, no backend. The whole app is one `index.html`.
+- **Rendering** — a hand-rolled render loop: all app state lives in a single JS object, `render()` regenerates the current view as an HTML string via template literals and swaps `#app.innerHTML`, and clicks are handled through one delegated listener keyed off `data-act` attributes rather than per-element handlers.
+- **Styling** — plain CSS with custom properties as design tokens (no Tailwind, Sass, or CSS-in-JS), laid out with Grid and Flexbox. The hero's halftone grain texture is a `radial-gradient` + `mask-image` trick — no image asset.
+- **Fonts** (Google Fonts) — `Archivo` for display/headings, `Work Sans` for body text, `IBM Plex Mono` for stats and timestamps.
+- **Browser APIs** — `localStorage` for persisting app state (in-memory fallback if unavailable), `navigator.mediaDevices.getUserMedia()` for the video call demo's real camera/mic self-preview. Icons are a small hand-authored inline SVG set — no icon library.
+- **Assets** — `logo.jpg` embedded inline as a base64 data URI (also used as the favicon), so there are no external asset requests at runtime.
+- **Hosting** — works straight off disk over `file://`, or on any static host (GitHub Pages, Netlify, S3, …) since there's no server-side runtime to deploy.
+
 ## The flow this prototype proves out
 
 Sign up → pick skills to teach/learn → get ranked matches with a smart-match score → view a match's profile → send a swap request → get accepted → schedule a session → join a video call, chat, share notes & resources in the session workspace → mark it complete → rate & badge your partner → see your own progress bars update automatically.
