@@ -605,7 +605,7 @@ function freshState(){
     sessions: [],
     progress: {},
     route: {tab:"landing"},
-    onboarding: {step:1, teach:[], learn:[], availability:[], name:"", school:"APIIT", year:"", bio:""}
+    onboarding: {step:1, teach:[], learn:[], availability:[], customAvailability:[], name:"", school:"APIIT", year:"", bio:""}
   };
 }
 function loadState(){
@@ -921,15 +921,25 @@ function onbStep4(){
   return `
     <div class="onb-step-label">Step 4 of ${ONB_STEPS} · Availability</div>
     <h2>When are you usually free?</h2>
-    <p class="onb-help">This helps us line you up with matches who can actually meet.</p>
+    <p class="onb-help">This helps us line you up with matches who can actually meet. Pick as many preset slots as fit, or add your own.</p>
+    <span class="taglabel">Common slots</span>
     <div class="chip-grid">
       ${AVAILABILITY_OPTIONS.map(a=>`<div class="chip ${ob.availability.includes(a)?"sel-teach":""}" data-act="onb-toggle-avail" data-slot="${esc(a)}">${esc(a)}</div>`).join("")}
     </div>
+    ${ob.customAvailability.length ? `
+    <span class="taglabel" style="margin-top:16px;">Your own slots</span>
+    <div class="chip-grid">
+      ${ob.customAvailability.map(a=>`<div class="chip sel-learn" data-act="onb-remove-custom-avail" data-slot="${esc(a)}" title="Click to remove">${esc(a)} ${icon("close")}</div>`).join("")}
+    </div>` : ""}
+    <div class="add-resource-row" style="margin-top:16px;">
+      <input id="customAvailInput" type="text" placeholder="Add your own, e.g. Sunday mornings, after 10pm..." maxlength="40">
+      <button class="btn btn-soft btn-sm" data-act="onb-add-avail">${icon("plus")} Add</button>
+    </div>
     <div class="onb-actions">
-      <span class="onb-count">${ob.availability.length} selected</span>
+      <span class="onb-count">${ob.availability.length + ob.customAvailability.length} selected</span>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-ghost" data-act="onb-back">Back</button>
-        <button class="btn btn-primary" data-act="onb-finish" ${ob.availability.length===0?"disabled":""}>Find my matches ${icon("chevronR")}</button>
+        <button class="btn btn-primary" data-act="onb-finish" ${(ob.availability.length+ob.customAvailability.length)===0?"disabled":""}>Find my matches ${icon("chevronR")}</button>
       </div>
     </div>`;
 }
@@ -1480,12 +1490,28 @@ document.addEventListener("click", function(e){
     if(idx>-1) arr.splice(idx,1); else arr.push(slot);
     render(); return;
   }
+  if(act==="onb-add-avail"){
+    const input = document.getElementById("customAvailInput");
+    const val = input.value.trim();
+    if(!val){ toast("Type a slot before adding it."); return; }
+    const ob = state.onboarding;
+    const exists = [...AVAILABILITY_OPTIONS, ...ob.customAvailability].some(a=>a.toLowerCase()===val.toLowerCase());
+    if(exists){ toast("That slot is already on your list."); return; }
+    ob.customAvailability.push(val);
+    render(); return;
+  }
+  if(act==="onb-remove-custom-avail"){
+    const ob = state.onboarding;
+    const idx = ob.customAvailability.indexOf(t.dataset.slot);
+    if(idx>-1) ob.customAvailability.splice(idx,1);
+    render(); return;
+  }
   if(act==="onb-finish"){
     const ob = state.onboarding;
     const id = "you";
     state.users[id] = {
       id, name: ob.name, school: ob.school||"APIIT", year: ob.year||"Undeclared",
-      bio: ob.bio, teach: ob.teach.slice(), want: ob.learn.slice(), availability: ob.availability.slice(),
+      bio: ob.bio, teach: ob.teach.slice(), want: ob.learn.slice(), availability: ob.availability.concat(ob.customAvailability),
       rating: 0, sessionsCompleted: 0, badges: [], memberSince: new Date().toLocaleDateString(undefined,{month:"short",year:"numeric"}),
       hue: hashStr(ob.name)%360
     };
